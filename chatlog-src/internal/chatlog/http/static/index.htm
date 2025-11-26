@@ -1,0 +1,2521 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Chatlog</title>
+		<style>
+			:root {
+				--primary-color: #3498db;
+				--primary-dark: #2980b9;
+				--success-color: #2ecc71;
+				--success-dark: #27ae60;
+				--error-color: #e74c3c;
+				--bg-light: #f5f5f5;
+				--bg-white: #ffffff;
+				--text-color: #333333;
+				--border-color: #dddddd;
+			}
+
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+					Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+					"Helvetica Neue", sans-serif;
+				line-height: 1.6;
+				color: var(--text-color);
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 20px;
+				background-color: #fafafa;
+			}
+
+			.container {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				width: 100%;
+			}
+
+			.welcome-text {
+				text-align: center;
+				margin-bottom: 30px;
+			}
+
+			.api-section {
+				background-color: var(--bg-light);
+				border-radius: 10px;
+				padding: 25px;
+				width: 100%;
+				max-width: 850px;
+				margin-bottom: 30px;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+			}
+
+			h1 {
+				color: #2c3e50;
+				margin-bottom: 15px;
+			}
+
+			h2 {
+				color: var(--primary-color);
+				margin-top: 20px;
+				border-bottom: 2px solid var(--primary-color);
+				padding-bottom: 8px;
+				display: inline-block;
+			}
+
+			h3 {
+				margin-top: 20px;
+				color: #34495e;
+			}
+
+			.docs-link {
+				color: var(--primary-color);
+				text-decoration: none;
+				font-weight: bold;
+				transition: all 0.2s ease;
+			}
+
+			.docs-link:hover {
+				text-decoration: underline;
+				color: var(--primary-dark);
+			}
+
+			.api-tester {
+				background-color: var(--bg-white);
+				border: 1px solid var(--border-color);
+				border-radius: 10px;
+				padding: 25px;
+				margin-top: 20px;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+			}
+
+			.form-group {
+				margin-bottom: 18px;
+			}
+
+			.date-range {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				flex-wrap: wrap;
+			}
+
+			.date-range input[type="date"] {
+				flex: 1 1 160px;
+				min-width: 140px;
+			}
+
+			.date-separator {
+				color: #666;
+				font-weight: 600;
+			}
+
+			.form-hint {
+				margin-top: 6px;
+				font-size: 12px;
+				color: #777;
+			}
+
+			label {
+				display: block;
+				margin-bottom: 6px;
+				font-weight: 600;
+				color: #34495e;
+			}
+
+			input,
+			select,
+			textarea {
+				width: 100%;
+				padding: 10px 12px;
+				border: 1px solid #ddd;
+				border-radius: 6px;
+				box-sizing: border-box;
+				font-size: 14px;
+				transition: all 0.3s;
+			}
+
+			input:focus,
+			select:focus,
+			textarea:focus {
+				outline: none;
+				border-color: var(--primary-color);
+				box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+			}
+
+			input::placeholder,
+			textarea::placeholder {
+				color: #aaa;
+			}
+
+			button {
+				background-color: var(--primary-color);
+				color: white;
+				border: none;
+				padding: 12px 18px;
+				border-radius: 6px;
+				cursor: pointer;
+				font-size: 16px;
+				font-weight: 500;
+				transition: all 0.3s;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				position: relative;
+			}
+
+			button:hover {
+				background-color: var(--primary-dark);
+				transform: translateY(-1px);
+				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+			}
+
+			button:active {
+				transform: translateY(0);
+			}
+
+			.voice-entry {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				margin: 4px 0;
+				flex-wrap: wrap;
+			}
+
+			.voice-transcribe-btn {
+				padding: 2px 8px;
+				font-size: 12px;
+				border: 1px solid #888;
+				border-radius: 6px;
+				background-color: #f0f0f0;
+				color: #222;
+				cursor: pointer;
+				transition: opacity 0.2s ease;
+			}
+
+			.voice-transcribe-btn--busy,
+			.voice-transcribe-btn:disabled {
+				opacity: 0.6;
+				cursor: wait;
+			}
+
+			.voice-transcribe-result {
+				font-size: 12px;
+				color: #444;
+				min-height: 1em;
+				max-width: 520px;
+				white-space: pre-wrap;
+				word-break: break-word;
+			}
+
+			.result-container {
+				margin-top: 20px;
+				border: 1px solid var(--border-color);
+				border-radius: 6px;
+				padding: 15px;
+				background-color: #f9f9f9;
+				max-height: 400px;
+				overflow-y: auto;
+				white-space: pre-wrap;
+				font-family: "SFMono-Regular", Consolas, "Liberation Mono",
+					Menlo, monospace;
+				font-size: 14px;
+				line-height: 1.5;
+				position: relative;
+			}
+
+			.result-block {
+				margin: 0;
+				white-space: pre-wrap;
+				font-family: "SFMono-Regular", Consolas, "Liberation Mono",
+					Menlo, monospace;
+				font-size: 14px;
+				line-height: 1.6;
+			}
+
+			.request-url {
+				background-color: #f0f0f0;
+				padding: 10px;
+				border-radius: 6px;
+				margin-bottom: 10px;
+				font-family: "SFMono-Regular", Consolas, "Liberation Mono",
+					Menlo, monospace;
+				font-size: 14px;
+				word-break: break-all;
+				border: 1px dashed #ccc;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			.url-text {
+				flex-grow: 1;
+				margin-right: 10px;
+			}
+
+			.copy-url-button {
+				background-color: #9b59b6;
+				padding: 6px 12px;
+				font-size: 12px;
+				white-space: nowrap;
+			}
+
+			.loading {
+				text-align: center;
+				padding: 20px;
+				color: #666;
+			}
+
+			.loading::after {
+				content: "...";
+				animation: dots 1.5s steps(5, end) infinite;
+			}
+
+			.search-index-status {
+				display: none;
+				margin-bottom: 16px;
+				padding: 12px 14px;
+				border-radius: 6px;
+				border: 1px solid #ffe1a3;
+				background-color: #fff8e5;
+				color: #8a6d3b;
+				font-size: 14px;
+				line-height: 1.5;
+			}
+
+			@keyframes dots {
+				0%,
+				20% {
+					content: ".";
+				}
+				40% {
+					content: "..";
+				}
+				60% {
+					content: "...";
+				}
+				80%,
+				100% {
+					content: "";
+				}
+			}
+
+			.tab-container {
+				display: flex;
+				margin-bottom: 20px;
+				border-bottom: 1px solid #e0e0e0;
+			}
+
+			.tab {
+				padding: 12px 20px;
+				cursor: pointer;
+				margin-right: 5px;
+				border-radius: 6px 6px 0 0;
+				font-weight: 500;
+				transition: all 0.2s;
+				border: 1px solid transparent;
+				border-bottom: none;
+				position: relative;
+				bottom: -1px;
+			}
+
+			.tab:hover {
+				background-color: #f0f8ff;
+			}
+
+			.tab.active {
+				background-color: var(--bg-white);
+				border-color: #e0e0e0;
+				color: var(--primary-color);
+				border-bottom: 1px solid white;
+			}
+
+			.tab-content {
+				display: none;
+				padding: 20px 0;
+			}
+
+			.tab-content.active {
+				display: block;
+				animation: fadeIn 0.3s;
+			}
+
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+				}
+				to {
+					opacity: 1;
+				}
+			}
+
+			.button-group {
+				display: flex;
+				justify-content: flex-end;
+				margin-top: 20px;
+			}
+
+			.copy-button {
+				background-color: var(--success-color);
+				padding: 8px 15px;
+				font-size: 14px;
+				margin-left: 10px;
+			}
+
+			.copy-button:hover {
+				background-color: var(--success-dark);
+			}
+
+			.error-message {
+				color: var(--error-color);
+				font-weight: bold;
+				margin-top: 10px;
+				padding: 10px;
+				border-radius: 4px;
+				background-color: rgba(231, 76, 60, 0.1);
+				border-left: 4px solid var(--error-color);
+				display: none;
+			}
+
+			.api-description {
+				margin-bottom: 15px;
+				color: #555;
+			}
+
+			.badge {
+				display: inline-block;
+				padding: 3px 8px;
+				border-radius: 12px;
+				font-size: 12px;
+				font-weight: 600;
+				margin-left: 8px;
+				background-color: rgba(52, 152, 219, 0.1);
+				color: var(--primary-color);
+			}
+
+			.optional-param {
+				font-size: 12px;
+				color: #777;
+				margin-left: 5px;
+				font-style: italic;
+			}
+
+			.search-highlight {
+				background-color: #fff3b0;
+				color: inherit;
+				padding: 0 2px;
+				border-radius: 3px;
+			}
+
+			.required-field {
+				color: var(--error-color);
+				font-weight: bold;
+			}
+
+			.settings-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+				gap: 20px;
+			}
+
+			.settings-card {
+				background-color: var(--bg-white);
+				border: 1px solid var(--border-color);
+				border-radius: 12px;
+				padding: 20px;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+			}
+
+			.settings-card--wide {
+				grid-column: 1 / -1;
+			}
+
+			.settings-card h3 {
+				margin-top: 0;
+				margin-bottom: 12px;
+				color: #2c3e50;
+			}
+
+			.settings-card p {
+				margin-top: 0;
+				color: #555;
+			}
+
+			.settings-buttons {
+				display: flex;
+				gap: 12px;
+				flex-wrap: wrap;
+				margin-top: 12px;
+			}
+
+			.secondary-button {
+				background-color: #7f8c8d;
+			}
+
+			.secondary-button:hover {
+				background-color: #707b7c;
+			}
+
+			.danger-button {
+				background-color: var(--error-color);
+			}
+
+			.danger-button:hover {
+				background-color: #c0392b;
+			}
+
+			.settings-message {
+				display: none;
+				margin-bottom: 16px;
+				padding: 10px 14px;
+				border-radius: 6px;
+				font-weight: 500;
+			}
+
+			.settings-message--info {
+				background-color: rgba(52, 152, 219, 0.1);
+				color: var(--primary-dark);
+				border: 1px solid rgba(52, 152, 219, 0.2);
+			}
+
+			.settings-message--success {
+				background-color: rgba(46, 204, 113, 0.12);
+				color: var(--success-dark);
+				border: 1px solid rgba(46, 204, 113, 0.2);
+			}
+
+			.settings-message--error {
+				background-color: rgba(231, 76, 60, 0.12);
+				color: var(--error-color);
+				border: 1px solid rgba(231, 76, 60, 0.2);
+			}
+
+			.settings-loading {
+				display: none;
+				align-items: center;
+				gap: 8px;
+				color: #666;
+				font-size: 14px;
+				margin-bottom: 12px;
+			}
+
+			.settings-loading::before {
+				content: "";
+				width: 14px;
+				height: 14px;
+				border-radius: 50%;
+				border: 2px solid rgba(0, 0, 0, 0.15);
+				border-top-color: var(--primary-color);
+				animation: settings-spin 0.8s linear infinite;
+			}
+
+			@keyframes settings-spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
+			.status-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 6px 0;
+			}
+
+			.status-badge {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 2px 10px;
+				border-radius: 999px;
+				font-size: 12px;
+				font-weight: 600;
+				background-color: #bdc3c7;
+				color: #2c3e50;
+			}
+
+			.status-badge--on {
+				background-color: var(--success-color);
+				color: #fff;
+			}
+
+			.status-badge--off {
+				background-color: #bdc3c7;
+				color: #2c3e50;
+			}
+
+			.settings-actions {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+				margin-top: 12px;
+			}
+
+			.settings-actions button {
+				flex: 1 1 180px;
+				min-width: 160px;
+			}
+
+			#settings-speech-json {
+				font-family: "SFMono-Regular", Consolas, "Liberation Mono",
+					Menlo, monospace;
+				font-size: 13px;
+				min-height: 220px;
+				resize: vertical;
+			}
+
+			.button--loading {
+				opacity: 0.6;
+				cursor: wait !important;
+			}
+
+			.button--loading::after {
+				content: "";
+				position: absolute;
+				right: 14px;
+				top: 50%;
+				width: 12px;
+				height: 12px;
+				margin-top: -6px;
+				border-radius: 50%;
+				border: 2px solid rgba(255, 255, 255, 0.6);
+				border-top-color: #fff;
+				animation: settings-spin 0.8s linear infinite;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="welcome-text">
+				<h1>🎉 恭喜！Chatlog 服务已成功启动</h1>
+				<p>
+					Chatlog
+					是一个帮助你轻松使用自己聊天数据的工具，现在你可以通过 HTTP
+					API 访问你的聊天记录、联系人和群聊信息。
+				</p>
+			</div>
+
+			<div class="api-section">
+				<h2>🔍 API 接口与调试</h2>
+
+				<div class="api-tester">
+					<div class="tab-container">
+						<div class="tab active" data-tab="session">
+							最近会话
+						</div>
+						<div class="tab" data-tab="chatroom">群聊</div>
+						<div class="tab" data-tab="contact">联系人</div>
+						<div class="tab" data-tab="chatlog">聊天记录</div>
+						<div class="tab" data-tab="search">搜索</div>
+						<div class="tab" data-tab="diary">日记</div>
+						<div class="tab" data-tab="settings">系统设置</div>
+					</div>
+
+					<!-- 会话查询表单 -->
+					<div class="tab-content active" id="session-tab">
+						<div class="api-description">
+							<p>
+								查询最近会话列表。<span class="badge"
+									>GET /api/v1/session</span
+								>
+							</p>
+						</div>
+						<div class="form-group">
+							<label for="session-format"
+								>输出格式：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<select id="session-format">
+								<option value="">默认</option>
+								<option value="json">JSON</option>
+								<option value="text">纯文本</option>
+								<option value="html">HTML</option>
+							</select>
+						</div>
+					</div>
+
+					<!-- 日记查询表单 -->
+					<div class="tab-content" id="diary-tab">
+						<div class="api-description">
+							<p>
+								选择某一天导出当日我参与过的会话全部消息。<span
+									class="badge"
+									>GET /api/v1/diary</span
+								>
+							</p>
+						</div>
+						<div class="form-group">
+							<label for="diary-date"
+								>选择日期：<span class="required-field"
+									>*</span
+								></label
+							>
+							<input type="date" id="diary-date" />
+						</div>
+						<div class="form-group">
+							<label for="diary-talker"
+								>聊天对象：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<input
+								type="text"
+								id="diary-talker"
+								placeholder="wxid、群ID、备注名或昵称（多个用逗号分隔）"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="diary-format"
+								>输出格式：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<select id="diary-format">
+								<option value="">默认</option>
+								<option value="json">JSON</option>
+								<option value="text">纯文本</option>
+								<option value="html">HTML</option>
+								<option value="csv">CSV</option>
+							</select>
+						</div>
+					</div>
+
+					<!-- 群聊查询表单 -->
+					<div class="tab-content" id="chatroom-tab">
+						<div class="api-description">
+							<p>
+								查询群聊列表，可选择性地按关键词搜索。<span
+									class="badge"
+									>GET /api/v1/chatroom</span
+								>
+							</p>
+						</div>
+						<div class="form-group">
+							<label for="chatroom-keyword"
+								>搜索群聊：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<input
+								type="text"
+								id="chatroom-keyword"
+								placeholder="输入关键词搜索群聊"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="chatroom-format"
+								>输出格式：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<select id="chatroom-format">
+								<option value="">默认</option>
+								<option value="json">JSON</option>
+								<option value="text">纯文本</option>
+							</select>
+						</div>
+					</div>
+
+					<!-- 联系人查询表单 -->
+					<div class="tab-content" id="contact-tab">
+						<div class="api-description">
+							<p>
+								查询联系人列表，可选择性地按关键词搜索。<span
+									class="badge"
+									>GET /api/v1/contact</span
+								>
+							</p>
+						</div>
+						<div class="form-group">
+							<label for="contact-keyword"
+								>搜索联系人：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<input
+								type="text"
+								id="contact-keyword"
+								placeholder="输入关键词搜索联系人"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="contact-format"
+								>输出格式：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<select id="contact-format">
+								<option value="">默认</option>
+								<option value="json">JSON</option>
+								<option value="text">纯文本</option>
+							</select>
+						</div>
+					</div>
+
+					<!-- 聊天记录查询表单 -->
+					<div class="tab-content" id="chatlog-tab">
+						<div class="api-description">
+							<p>
+								查询指定时间范围内与特定联系人或群聊的聊天记录。<span
+									class="badge"
+									>GET /api/v1/chatlog</span
+								>
+							</p>
+						</div>
+						<div class="form-group">
+							<label for="start-date"
+								>时间范围：<span class="required-field"
+									>*</span
+								></label
+							>
+							<div class="date-range">
+								<input type="date" id="start-date" />
+								<span class="date-separator">至</span>
+								<input type="date" id="end-date" />
+							</div>
+							<div class="form-hint">
+								请选择开始日期，结束日期可选，默认为同一天
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="talker"
+								>聊天对象：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<input
+								type="text"
+								id="talker"
+								placeholder="wxid、群ID、备注名或昵称 (留空输出所有)"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="sender"
+								>发送者：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<input
+								type="text"
+								id="sender"
+								placeholder="指定消息发送者"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="keyword"
+								>关键词：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<input
+								type="text"
+								id="keyword"
+								placeholder="搜索消息内容中的关键词"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="limit"
+								>返回数量：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<input
+								type="number"
+								id="limit"
+								placeholder="默认不做限制"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="offset"
+								>偏移量：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<input
+								type="number"
+								id="offset"
+								placeholder="默认 0"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="format"
+								>输出格式：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<select id="format">
+								<option value="">默认</option>
+								<option value="text">纯文本</option>
+								<option value="json">JSON</option>
+								<option value="csv">CSV</option>
+								<option value="html">HTML</option>
+							</select>
+						</div>
+					</div>
+
+					<!-- 搜索表单 -->
+					<div class="tab-content" id="search-tab">
+						<div class="api-description">
+							<p>
+								使用
+								<strong>SQLite FTS</strong>
+								在指定会话中查找消息。<span class="badge"
+									>GET /api/v1/search</span
+								>
+							</p>
+						</div>
+						<div
+							id="search-index-status"
+							class="search-index-status"
+							role="status"
+							aria-live="polite"
+						>
+							正在检查全文索引状态...
+						</div>
+						<div class="form-group">
+							<label for="search-start-date"
+								>时间范围：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<div class="date-range">
+								<input type="date" id="search-start-date" />
+								<span class="date-separator">至</span>
+								<input type="date" id="search-end-date" />
+							</div>
+							<div class="form-hint">
+								留空表示不限制时间范围。
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="search-query"
+								>关键词：<span class="required-field"
+									>*</span
+								></label
+							>
+							<input
+								id="search-query"
+								type="text"
+								placeholder="支持空格分词"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="search-talker"
+								>聊天对象（可多个，英文逗号分隔）：<span
+									class="optional-param"
+									>可选</span
+								></label
+							>
+							<input
+								id="search-talker"
+								type="text"
+								placeholder="wxid、群ID、备注名或昵称 (留空输出所有)"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="search-sender"
+								>发送者：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<input
+								id="search-sender"
+								type="text"
+								placeholder="支持多个发送者，英文逗号分隔"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="search-limit"
+								>返回数量：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<input
+								id="search-limit"
+								type="number"
+								min="1"
+								max="200"
+								placeholder="默认 20，最大 200"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="search-offset"
+								>偏移量：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<input
+								id="search-offset"
+								type="number"
+								min="0"
+								placeholder="默认 0"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="search-format"
+								>输出格式：<span class="optional-param"
+									>可选</span
+								></label
+							>
+							<select id="search-format">
+								<option value="">默认</option>
+								<option value="json">JSON</option>
+								<option value="text">纯文本</option>
+								<option value="html">HTML</option>
+								<option value="csv">CSV</option>
+							</select>
+						</div>
+					</div>
+
+					<button id="test-api">执行查询</button>
+
+					<div
+						id="result-wrapper"
+						style="display: none; margin-top: 20px"
+					>
+						<div class="request-url" id="request-url-container">
+							<span class="url-text" id="request-url"></span>
+							<button
+								class="copy-button copy-url-button"
+								id="copy-url"
+							>
+								复制请求URL
+							</button>
+						</div>
+						<div class="result-container" id="api-result">
+							<p>查询结果将显示在这里...</p>
+						</div>
+						<div class="button-group">
+							<button class="copy-button" id="copy-result">
+								复制结果
+							</button>
+						</div>
+					</div>
+					<div class="error-message" id="error-message"></div>
+				</div>
+
+				<!-- 设置管理 -->
+				<div class="tab-content" id="settings-tab">
+					<div id="settings-message" class="settings-message"></div>
+					<div id="settings-loading" class="settings-loading">
+						正在加载设置...
+					</div>
+					<div class="settings-grid">
+						<div class="settings-card">
+							<h3>基础配置</h3>
+							<div class="form-group">
+								<label for="settings-http-addr"
+									>HTTP 服务地址</label
+								>
+								<input
+									type="text"
+									id="settings-http-addr"
+									placeholder="示例：127.0.0.1:5030"
+									autocomplete="off"
+								/>
+								<div class="form-hint">
+									修改后需重新启动 HTTP 服务才会生效
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="settings-work-dir">工作目录</label>
+								<input
+									type="text"
+									id="settings-work-dir"
+									placeholder="用于存储解密后的数据"
+									autocomplete="off"
+								/>
+							</div>
+							<div class="form-group">
+								<label for="settings-data-dir">数据目录</label>
+								<input
+									type="text"
+									id="settings-data-dir"
+									placeholder="微信数据目录路径"
+									autocomplete="off"
+								/>
+							</div>
+							<div class="form-group">
+								<label for="settings-data-key">数据密钥</label>
+								<input
+									type="password"
+									id="settings-data-key"
+									placeholder="留空则保持不变"
+									autocomplete="new-password"
+								/>
+								<div
+									class="form-hint"
+									id="settings-data-key-hint"
+								>
+									未设置
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="settings-img-key">图片密钥</label>
+								<input
+									type="password"
+									id="settings-img-key"
+									placeholder="留空则保持不变"
+									autocomplete="new-password"
+								/>
+								<div
+									class="form-hint"
+									id="settings-img-key-hint"
+								>
+									未设置
+								</div>
+							</div>
+							<div class="settings-buttons">
+								<button id="settings-save-basic">
+									保存基础配置
+								</button>
+								<button
+									class="secondary-button"
+									id="settings-refresh"
+								>
+									刷新
+								</button>
+							</div>
+						</div>
+
+						<div class="settings-card">
+							<h3>语音配置</h3>
+							<p>
+								直接编辑 Whisper 配置，保存后会写入
+								<code>whisper.json</code>
+							</p>
+							<textarea
+								id="settings-speech-json"
+								spellcheck="false"
+							></textarea>
+							<div class="form-hint">
+								保存前请确认 JSON
+								格式正确，可仅保留需要修改的字段。
+							</div>
+							<div class="settings-buttons">
+								<button id="settings-save-speech">
+									保存语音配置
+								</button>
+							</div>
+						</div>
+
+						<div class="settings-card settings-card--wide">
+							<h3>运行控制</h3>
+							<div class="status-row">
+								<span>HTTP 服务状态</span>
+								<span
+									id="settings-status-http"
+									class="status-badge"
+									>未知</span
+								>
+							</div>
+							<div class="status-row">
+								<span>自动解密</span>
+								<span
+									id="settings-status-auto"
+									class="status-badge"
+									>未知</span
+								>
+							</div>
+							<div class="settings-actions">
+								<button id="settings-action-get-key">
+									重新抓取密钥
+								</button>
+								<button
+									id="settings-action-decrypt"
+									class="secondary-button"
+								>
+									手动解密
+								</button>
+							</div>
+							<div class="settings-actions">
+								<button id="settings-action-start-auto">
+									开启自动解密
+								</button>
+								<button
+									id="settings-action-stop-auto"
+									class="secondary-button"
+								>
+									停止自动解密
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="api-section">
+				<h2>🤖 MCP 集成</h2>
+				<p>
+					Chatlog 支持 MCP (Model Context Protocol) SSE 协议，可与支持
+					MCP 的 AI 助手无缝集成。
+				</p>
+				<p>SSE 端点：<strong>/sse</strong></p>
+				<p>
+					详细集成指南请参考
+					<a
+						href="https://github.com/sjzar/chatlog/blob/main/docs/mcp.md"
+						class="docs-link"
+						target="_blank"
+						>MCP 集成指南</a
+					>
+				</p>
+			</div>
+
+			<div class="api-section">
+				<h2>📚 更多资源</h2>
+				<p>
+					查看
+					<a
+						href="https://github.com/sjzar/chatlog"
+						class="docs-link"
+						target="_blank"
+						>GitHub 项目</a
+					>
+					获取完整文档和使用指南。
+				</p>
+				<p>
+					如果你有任何问题或建议，欢迎通过
+					<a
+						href="https://github.com/sjzar/chatlog/discussions"
+						class="docs-link"
+						target="_blank"
+						>Discussions</a
+					>
+					进行交流。
+				</p>
+			</div>
+		</div>
+
+		<script>
+			const SETTINGS_TAB = "settings";
+
+			const settingsElements = {
+				tab: document.getElementById("settings-tab"),
+				message: document.getElementById("settings-message"),
+				loading: document.getElementById("settings-loading"),
+				httpAddr: document.getElementById("settings-http-addr"),
+				workDir: document.getElementById("settings-work-dir"),
+				dataDir: document.getElementById("settings-data-dir"),
+				dataKey: document.getElementById("settings-data-key"),
+				dataKeyHint: document.getElementById("settings-data-key-hint"),
+				imgKey: document.getElementById("settings-img-key"),
+				imgKeyHint: document.getElementById("settings-img-key-hint"),
+				speechTextarea: document.getElementById("settings-speech-json"),
+				saveBasicBtn: document.getElementById("settings-save-basic"),
+				refreshBtn: document.getElementById("settings-refresh"),
+				saveSpeechBtn: document.getElementById("settings-save-speech"),
+				httpStatus: document.getElementById("settings-status-http"),
+				autoStatus: document.getElementById("settings-status-auto"),
+				getKeyBtn: document.getElementById("settings-action-get-key"),
+				decryptBtn: document.getElementById("settings-action-decrypt"),
+				startAutoBtn: document.getElementById(
+					"settings-action-start-auto"
+				),
+				stopAutoBtn: document.getElementById(
+					"settings-action-stop-auto"
+				),
+			};
+
+			let currentSettings = null;
+			let settingsLoadedOnce = false;
+			let speechDirty = false;
+
+			function getTrimmedValue(input) {
+				if (!input) {
+					return "";
+				}
+				return input.value.trim();
+			}
+
+			function summariseSecret(value) {
+				if (!value) {
+					return "未设置";
+				}
+				const trimmed = String(value).trim();
+				if (!trimmed) {
+					return "未设置";
+				}
+				if (trimmed.length <= 6) {
+					return "已设置（长度 " + trimmed.length + "）";
+				}
+				return (
+					trimmed.slice(0, 3) +
+					"..." +
+					trimmed.slice(-3) +
+					"（长度 " +
+					trimmed.length +
+					"）"
+				);
+			}
+
+			function clearSettingsMessage() {
+				if (!settingsElements.message) {
+					return;
+				}
+				settingsElements.message.textContent = "";
+				settingsElements.message.className = "settings-message";
+				settingsElements.message.style.display = "none";
+			}
+
+			function showSettingsMessage(type, text) {
+				if (!settingsElements.message) {
+					return;
+				}
+				settingsElements.message.textContent = text;
+				settingsElements.message.className =
+					"settings-message settings-message--" + type;
+				settingsElements.message.style.display = "block";
+			}
+
+			function setSettingsLoading(isLoading) {
+				if (!settingsElements.loading) {
+					return;
+				}
+				settingsElements.loading.style.display = isLoading
+					? "flex"
+					: "none";
+			}
+
+			function updateStatusBadge(element, enabled, labels) {
+				if (!element) {
+					return;
+				}
+				element.classList.remove(
+					"status-badge--on",
+					"status-badge--off"
+				);
+				if (enabled) {
+					element.classList.add("status-badge--on");
+					element.textContent =
+						labels && labels[1] ? labels[1] : "已启动";
+				} else {
+					element.classList.add("status-badge--off");
+					element.textContent =
+						labels && labels[0] ? labels[0] : "未启动";
+				}
+			}
+
+			async function extractErrorMessage(response) {
+				const contentType = response.headers.get("content-type") || "";
+				try {
+					if (contentType.indexOf("application/json") >= 0) {
+						const data = await response.json();
+						if (typeof data === "string") {
+							return data;
+						}
+						if (data && (data.error || data.message)) {
+							return data.error || data.message;
+						}
+						return JSON.stringify(data);
+					}
+					const text = await response.text();
+					return text || "HTTP " + response.status;
+				} catch (err) {
+					return "HTTP " + response.status;
+				}
+			}
+
+			async function fetchJSON(url, options) {
+				const response = await fetch(url, options || {});
+				if (!response.ok) {
+					throw new Error(await extractErrorMessage(response));
+				}
+				const contentType = response.headers.get("content-type") || "";
+				if (
+					response.status === 204 ||
+					contentType.indexOf("application/json") === -1
+				) {
+					return null;
+				}
+				return response.json();
+			}
+
+			function populateSettings(data, options) {
+				const opts = options || {};
+				currentSettings = data
+					? JSON.parse(JSON.stringify(data))
+					: null;
+				if (!currentSettings) {
+					return;
+				}
+
+				if (settingsElements.httpAddr) {
+					settingsElements.httpAddr.value =
+						currentSettings.http_addr || "";
+				}
+				if (settingsElements.workDir) {
+					settingsElements.workDir.value =
+						currentSettings.work_dir || "";
+				}
+				if (settingsElements.dataDir) {
+					settingsElements.dataDir.value =
+						currentSettings.data_dir || "";
+				}
+				if (settingsElements.dataKey) {
+					settingsElements.dataKey.value =
+						currentSettings.data_key || "";
+				}
+				if (settingsElements.dataKeyHint) {
+					settingsElements.dataKeyHint.textContent = summariseSecret(
+						currentSettings.data_key
+					);
+				}
+				if (settingsElements.imgKey) {
+					settingsElements.imgKey.value =
+						currentSettings.img_key || "";
+				}
+				if (settingsElements.imgKeyHint) {
+					settingsElements.imgKeyHint.textContent = summariseSecret(
+						currentSettings.img_key
+					);
+				}
+				if (settingsElements.httpStatus) {
+					updateStatusBadge(
+						settingsElements.httpStatus,
+						Boolean(currentSettings.http_enabled)
+					);
+				}
+				if (settingsElements.autoStatus) {
+					updateStatusBadge(
+						settingsElements.autoStatus,
+						Boolean(currentSettings.auto_decrypt),
+						["未开启", "已开启"]
+					);
+				}
+				if (settingsElements.startHttpBtn) {
+					settingsElements.startHttpBtn.disabled = Boolean(
+						currentSettings.http_enabled
+					);
+				}
+				if (settingsElements.stopHttpBtn) {
+					settingsElements.stopHttpBtn.disabled = !Boolean(
+						currentSettings.http_enabled
+					);
+				}
+				if (settingsElements.startAutoBtn) {
+					settingsElements.startAutoBtn.disabled = Boolean(
+						currentSettings.auto_decrypt
+					);
+				}
+				if (settingsElements.stopAutoBtn) {
+					settingsElements.stopAutoBtn.disabled = !Boolean(
+						currentSettings.auto_decrypt
+					);
+				}
+
+				var speechConfig = currentSettings.speech || {};
+				if (settingsElements.speechTextarea) {
+					var shouldOverwrite = opts.overwriteSpeech;
+					if (shouldOverwrite === undefined) {
+						shouldOverwrite = !speechDirty;
+					}
+					if (shouldOverwrite) {
+						settingsElements.speechTextarea.value = JSON.stringify(
+							speechConfig,
+							null,
+							2
+						);
+						speechDirty = false;
+					}
+				}
+
+				settingsLoadedOnce = true;
+			}
+
+			function valuesEqual(a, b) {
+				return (
+					(a === undefined ? "" : a) === (b === undefined ? "" : b)
+				);
+			}
+
+			async function loadSettings(options) {
+				if (!settingsElements.tab) {
+					return;
+				}
+				var opts = options || {};
+				if (!opts.silent) {
+					clearSettingsMessage();
+				}
+				setSettingsLoading(true);
+				try {
+					const data = await fetchJSON("/api/v1/setting");
+					if (data) {
+						populateSettings(data, {
+							overwriteSpeech: opts.forceSpeech || !speechDirty,
+						});
+						if (!opts.silent) {
+							showSettingsMessage("success", "设置已刷新");
+						}
+					}
+				} catch (err) {
+					showSettingsMessage(
+						"error",
+						"加载设置失败：" + err.message
+					);
+				} finally {
+					setSettingsLoading(false);
+				}
+			}
+
+			async function submitSettingsUpdate(
+				payload,
+				successText,
+				overwriteSpeech
+			) {
+				if (!payload || Object.keys(payload).length === 0) {
+					showSettingsMessage("info", "未检测到需要保存的更改");
+					return;
+				}
+				setSettingsLoading(true);
+				try {
+					const data = await fetchJSON("/api/v1/setting", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify(payload),
+					});
+					if (data) {
+						populateSettings(data, {
+							overwriteSpeech: overwriteSpeech,
+						});
+					}
+					showSettingsMessage("success", successText || "设置已更新");
+				} catch (err) {
+					showSettingsMessage("error", "保存失败：" + err.message);
+				} finally {
+					setSettingsLoading(false);
+				}
+			}
+
+			async function saveBasicSettings() {
+				if (!currentSettings) {
+					await loadSettings({ silent: true, forceSpeech: true });
+				}
+				var payload = {};
+				var httpAddr = getTrimmedValue(settingsElements.httpAddr);
+				var workDir = getTrimmedValue(settingsElements.workDir);
+				var dataDir = getTrimmedValue(settingsElements.dataDir);
+				var dataKey = getTrimmedValue(settingsElements.dataKey);
+				var imgKey = getTrimmedValue(settingsElements.imgKey);
+
+				var currentHttp = currentSettings
+					? currentSettings.http_addr || ""
+					: "";
+				var currentWork = currentSettings
+					? currentSettings.work_dir || ""
+					: "";
+				var currentData = currentSettings
+					? currentSettings.data_dir || ""
+					: "";
+				var currentDataKey = currentSettings
+					? currentSettings.data_key || ""
+					: "";
+				var currentImgKey = currentSettings
+					? currentSettings.img_key || ""
+					: "";
+
+				if (!valuesEqual(currentHttp, httpAddr)) {
+					payload.http_addr = httpAddr;
+				}
+				if (!valuesEqual(currentWork, workDir)) {
+					payload.work_dir = workDir;
+				}
+				if (!valuesEqual(currentData, dataDir)) {
+					payload.data_dir = dataDir;
+				}
+				if (!valuesEqual(currentDataKey, dataKey)) {
+					payload.data_key = dataKey;
+				}
+				if (!valuesEqual(currentImgKey, imgKey)) {
+					payload.img_key = imgKey;
+				}
+
+				await submitSettingsUpdate(payload, "基础配置已保存", false);
+			}
+
+			async function saveSpeechSettings() {
+				if (!settingsElements.speechTextarea) {
+					return;
+				}
+				var raw = settingsElements.speechTextarea.value.trim();
+				if (!raw) {
+					showSettingsMessage("error", "请输入有效的 JSON 配置");
+					return;
+				}
+				var parsed;
+				try {
+					parsed = JSON.parse(raw);
+				} catch (err) {
+					showSettingsMessage(
+						"error",
+						"JSON 解析失败：" + err.message
+					);
+					return;
+				}
+				speechDirty = false;
+				await submitSettingsUpdate(
+					{ speech: parsed },
+					"语音配置已保存",
+					true
+				);
+			}
+
+			async function callSettingAction(endpoint, options) {
+				var opts = options || {};
+				if (!endpoint) {
+					return;
+				}
+				if (
+					opts.confirmMessage &&
+					!window.confirm(opts.confirmMessage)
+				) {
+					return;
+				}
+				clearSettingsMessage();
+				if (opts.button) {
+					opts.button.disabled = true;
+					opts.button.classList.add("button--loading");
+				}
+				try {
+					const response = await fetch(endpoint, { method: "POST" });
+					if (!response.ok) {
+						throw new Error(await extractErrorMessage(response));
+					}
+					try {
+						await response.json();
+					} catch (err) {
+						// ignore non-json body
+					}
+					showSettingsMessage(
+						"success",
+						opts.successMessage || "操作已完成"
+					);
+					if (opts.refresh === undefined || opts.refresh) {
+						await loadSettings({
+							silent: true,
+							forceSpeech: false,
+						});
+					}
+				} catch (err) {
+					showSettingsMessage("error", "操作失败：" + err.message);
+				} finally {
+					if (opts.button) {
+						opts.button.disabled = false;
+						opts.button.classList.remove("button--loading");
+					}
+				}
+			}
+
+			if (settingsElements.saveBasicBtn) {
+				settingsElements.saveBasicBtn.addEventListener(
+					"click",
+					saveBasicSettings
+				);
+			}
+			if (settingsElements.refreshBtn) {
+				settingsElements.refreshBtn.addEventListener(
+					"click",
+					function () {
+						loadSettings({ silent: false, forceSpeech: false });
+					}
+				);
+			}
+			if (settingsElements.saveSpeechBtn) {
+				settingsElements.saveSpeechBtn.addEventListener(
+					"click",
+					saveSpeechSettings
+				);
+			}
+			if (settingsElements.speechTextarea) {
+				settingsElements.speechTextarea.addEventListener(
+					"input",
+					function () {
+						speechDirty = true;
+					}
+				);
+			}
+			if (settingsElements.getKeyBtn) {
+				settingsElements.getKeyBtn.addEventListener(
+					"click",
+					function (event) {
+						callSettingAction("/api/v1/actions/get-data-key", {
+							button: event.currentTarget,
+							successMessage: "已请求获取密钥，请稍后刷新设置。",
+						});
+					}
+				);
+			}
+			if (settingsElements.decryptBtn) {
+				settingsElements.decryptBtn.addEventListener(
+					"click",
+					function (event) {
+						callSettingAction("/api/v1/actions/decrypt", {
+							button: event.currentTarget,
+							confirmMessage: "确定立即执行手动解密吗？",
+							successMessage: "已触发手动解密任务。",
+						});
+					}
+				);
+			}
+			if (settingsElements.startAutoBtn) {
+				settingsElements.startAutoBtn.addEventListener(
+					"click",
+					function (event) {
+						callSettingAction(
+							"/api/v1/actions/auto-decrypt/start",
+							{
+								button: event.currentTarget,
+								successMessage: "已开启自动解密。",
+							}
+						);
+					}
+				);
+			}
+			if (settingsElements.stopAutoBtn) {
+				settingsElements.stopAutoBtn.addEventListener(
+					"click",
+					function (event) {
+						callSettingAction("/api/v1/actions/auto-decrypt/stop", {
+							button: event.currentTarget,
+							successMessage: "已关闭自动解密。",
+						});
+					}
+				);
+			}
+
+			loadSettings({ silent: true, forceSpeech: true });
+
+			let currentActiveTab = "session";
+			const initialTab = document.querySelector(".tab.active");
+			if (initialTab && initialTab.getAttribute("data-tab")) {
+				currentActiveTab = initialTab.getAttribute("data-tab");
+			}
+
+			const testApiButton = document.getElementById("test-api");
+			const apiResultContainer = document.getElementById("api-result");
+			const resultWrapper = document.getElementById("result-wrapper");
+			const requestUrlElement = document.getElementById("request-url");
+			const errorMessageElement =
+				document.getElementById("error-message");
+			const copyResultButton = document.getElementById("copy-result");
+			const copyUrlButton = document.getElementById("copy-url");
+			const searchIndexStatusBanner = document.getElementById(
+				"search-index-status"
+			);
+			let searchIndexReady = false;
+			let searchIndexStatusTimer = null;
+			if (searchIndexStatusBanner) {
+				searchIndexStatusBanner.dataset.statusText =
+					searchIndexStatusBanner.textContent.trim();
+			}
+
+			function updateSearchIndexBanner(status, options) {
+				if (!searchIndexStatusBanner) {
+					searchIndexReady = Boolean(status && status.ready);
+					return;
+				}
+				if (options && options.error) {
+					searchIndexReady = false;
+					searchIndexStatusBanner.style.display = "block";
+					searchIndexStatusBanner.textContent = options.error;
+					searchIndexStatusBanner.dataset.statusText = options.error;
+					return;
+				}
+				if (status && status.ready) {
+					searchIndexReady = true;
+					searchIndexStatusBanner.style.display = "none";
+					searchIndexStatusBanner.textContent = "";
+					searchIndexStatusBanner.dataset.statusText = "";
+					if (errorMessageElement) {
+						errorMessageElement.style.display = "none";
+						errorMessageElement.textContent = "";
+					}
+					return;
+				}
+				searchIndexReady = false;
+				let message = "全文索引正在初始化，请稍候...";
+				if (status) {
+					const rawProgress =
+						typeof status.progress === "number"
+							? Math.round(status.progress * 100)
+							: null;
+					if (status.in_progress) {
+						message = `全文索引正在构建中，请稍候...`;
+					} else {
+						message = `全文索引尚未就绪，请稍候...`;
+					}
+					if (status.last_error) {
+						message += ` 上次错误：${status.last_error}`;
+					}
+				}
+				searchIndexStatusBanner.style.display = "block";
+				searchIndexStatusBanner.textContent = message;
+				searchIndexStatusBanner.dataset.statusText = message;
+			}
+
+			function scheduleSearchIndexStatusRefresh(delay) {
+				if (searchIndexStatusTimer) {
+					clearTimeout(searchIndexStatusTimer);
+				}
+				const wait =
+					typeof delay === "number" && delay > 0 ? delay : 5000;
+				searchIndexStatusTimer = setTimeout(() => {
+					refreshSearchIndexStatus();
+				}, wait);
+			}
+
+			async function refreshSearchIndexStatus() {
+				if (!searchIndexStatusBanner) {
+					searchIndexReady = true;
+					return;
+				}
+				try {
+					const resp = await fetch(
+						"/api/v1/search?limit=1&offset=0",
+						{ headers: { Accept: "application/json" } }
+					);
+					if (!resp.ok) {
+						throw new Error(`HTTP ${resp.status}`);
+					}
+					const data = await resp.json();
+					const status =
+						data && data.index_status ? data.index_status : null;
+					updateSearchIndexBanner(status);
+					if (!searchIndexReady) {
+						scheduleSearchIndexStatusRefresh(
+							status && status.in_progress ? 4000 : 8000
+						);
+					}
+				} catch (err) {
+					console.error("search index status check failed", err);
+					updateSearchIndexBanner(null, {
+						error: "无法获取全文索引状态，将稍后重试。",
+					});
+					scheduleSearchIndexStatusRefresh(10000);
+				}
+			}
+
+			refreshSearchIndexStatus();
+
+			// 标签切换功能
+			document.querySelectorAll(".tab").forEach((tab) => {
+				tab.addEventListener("click", function () {
+					const newTab = this.getAttribute("data-tab");
+					const previousTab = currentActiveTab;
+					currentActiveTab = newTab;
+
+					document
+						.querySelectorAll(".tab")
+						.forEach((t) => t.classList.remove("active"));
+					this.classList.add("active");
+
+					document
+						.querySelectorAll(".tab-content")
+						.forEach((content) => {
+							content.classList.remove("active");
+						});
+
+					const tabId = newTab + "-tab";
+					const target = document.getElementById(tabId);
+					if (target) {
+						target.classList.add("active");
+					}
+
+					if (resultWrapper) {
+						resultWrapper.style.display = "none";
+					}
+					if (apiResultContainer) {
+						apiResultContainer.innerHTML =
+							"<p>查询结果将显示在这里...</p>";
+					}
+					if (requestUrlElement) {
+						requestUrlElement.textContent = "";
+					}
+					if (errorMessageElement) {
+						errorMessageElement.style.display = "none";
+						errorMessageElement.textContent = "";
+					}
+
+					const isSettings = newTab === SETTINGS_TAB;
+					if (testApiButton) {
+						testApiButton.style.display = isSettings
+							? "none"
+							: "inline-flex";
+					}
+					if (isSettings) {
+						loadSettings({
+							silent: previousTab === SETTINGS_TAB,
+							forceSpeech: false,
+						});
+					} else if (previousTab === SETTINGS_TAB) {
+						clearSettingsMessage();
+						setSettingsLoading(false);
+					}
+				});
+			});
+
+			// API 测试功能
+			if (testApiButton) {
+				testApiButton.addEventListener("click", async function () {
+					if (currentActiveTab === SETTINGS_TAB) {
+						if (errorMessageElement) {
+							errorMessageElement.textContent =
+								"请在“系统设置”标签页使用上方的设置表单";
+							errorMessageElement.style.display = "block";
+						}
+						return;
+					}
+
+					const resultContainer = apiResultContainer;
+					const requestUrlContainer = requestUrlElement;
+					const errorMessage = errorMessageElement;
+					const wrapper = resultWrapper;
+
+					if (errorMessage) {
+						errorMessage.style.display = "none";
+						errorMessage.textContent = "";
+					}
+
+					let highlightTerms = [];
+					let responseFormat = "";
+
+					try {
+						const activeTab = currentActiveTab;
+						let url = "/api/v1/";
+						const params = new URLSearchParams();
+
+						switch (activeTab) {
+							case "chatlog": {
+								url += "chatlog";
+								const startDate =
+									document.getElementById("start-date").value;
+								const endDate =
+									document.getElementById("end-date").value;
+								const talker = document
+									.getElementById("talker")
+									.value.trim();
+								const sender = document
+									.getElementById("sender")
+									.value.trim();
+								const keyword = document
+									.getElementById("keyword")
+									.value.trim();
+								const limit =
+									document.getElementById("limit").value;
+								const offset =
+									document.getElementById("offset").value;
+								const format =
+									document.getElementById("format").value;
+
+								if (!startDate && !endDate) {
+									errorMessage.textContent =
+										"错误: 请至少选择开始日期！";
+									errorMessage.style.display = "block";
+									return;
+								}
+
+								if (!startDate && endDate) {
+									errorMessage.textContent =
+										"错误: 请先选择开始日期！";
+									errorMessage.style.display = "block";
+									return;
+								}
+
+								let timeValue = "";
+								if (startDate && endDate) {
+									if (
+										new Date(startDate) > new Date(endDate)
+									) {
+										errorMessage.textContent =
+											"错误: 结束日期不能早于开始日期！";
+										errorMessage.style.display = "block";
+										return;
+									}
+									timeValue = `${startDate}~${endDate}`;
+								} else if (startDate) {
+									timeValue = startDate;
+								}
+
+								if (!timeValue) {
+									errorMessage.textContent =
+										"错误: 时间范围不合法！";
+									errorMessage.style.display = "block";
+									return;
+								}
+
+								params.append("time", timeValue);
+								if (talker) params.append("talker", talker);
+								if (sender) params.append("sender", sender);
+								if (keyword) {
+									params.append("keyword", keyword);
+									highlightTerms =
+										extractSearchTerms(keyword);
+								}
+								if (limit) params.append("limit", limit);
+								if (offset) params.append("offset", offset);
+								if (format) {
+									params.append("format", format);
+									responseFormat = format;
+								}
+								break;
+							}
+							case "contact": {
+								url += "contact";
+								const contactKeyword = document
+									.getElementById("contact-keyword")
+									.value.trim();
+								const contactFormat =
+									document.getElementById(
+										"contact-format"
+									).value;
+
+								if (contactKeyword) {
+									params.append("keyword", contactKeyword);
+									highlightTerms =
+										extractSearchTerms(contactKeyword);
+								}
+								if (contactFormat) {
+									params.append("format", contactFormat);
+									responseFormat = contactFormat;
+								}
+								break;
+							}
+							case "chatroom": {
+								url += "chatroom";
+								const chatroomKeyword = document
+									.getElementById("chatroom-keyword")
+									.value.trim();
+								const chatroomFormat =
+									document.getElementById(
+										"chatroom-format"
+									).value;
+
+								if (chatroomKeyword) {
+									params.append("keyword", chatroomKeyword);
+									highlightTerms =
+										extractSearchTerms(chatroomKeyword);
+								}
+								if (chatroomFormat) {
+									params.append("format", chatroomFormat);
+									responseFormat = chatroomFormat;
+								}
+								break;
+							}
+							case "session": {
+								url += "session";
+								const sessionFormat =
+									document.getElementById(
+										"session-format"
+									).value;
+								if (sessionFormat) {
+									params.append("format", sessionFormat);
+									responseFormat = sessionFormat;
+								}
+								break;
+							}
+							case "diary": {
+								url += "diary";
+								const diaryDateInput =
+									document.getElementById("diary-date");
+								const diaryDate = diaryDateInput
+									? diaryDateInput.value
+									: "";
+								const diaryTalker = document
+									.getElementById("diary-talker")
+									.value.trim();
+								const diaryFormat =
+									document.getElementById(
+										"diary-format"
+									).value;
+
+								if (!diaryDate) {
+									errorMessage.textContent =
+										"错误: 请选择日期！";
+									errorMessage.style.display = "block";
+									return;
+								}
+
+								params.append("date", diaryDate);
+								if (diaryTalker) {
+									params.append("talker", diaryTalker);
+									highlightTerms =
+										extractSearchTerms(diaryTalker);
+								}
+								if (diaryFormat) {
+									params.append("format", diaryFormat);
+									responseFormat = diaryFormat;
+								}
+								break;
+							}
+							case "search": {
+								url += "search";
+								const searchQuery =
+									document.getElementById(
+										"search-query"
+									).value;
+								const searchTalker =
+									document.getElementById(
+										"search-talker"
+									).value;
+								const searchSender =
+									document.getElementById(
+										"search-sender"
+									).value;
+								const searchStartDate =
+									document.getElementById(
+										"search-start-date"
+									).value;
+								const searchEndDate =
+									document.getElementById(
+										"search-end-date"
+									).value;
+								const searchLimit =
+									document.getElementById(
+										"search-limit"
+									).value;
+								const searchOffset =
+									document.getElementById(
+										"search-offset"
+									).value;
+								const searchFormatSelect =
+									document.getElementById("search-format");
+								const searchFormatValue = searchFormatSelect
+									? searchFormatSelect.value
+									: "";
+
+								if (!searchQuery.trim()) {
+									errorMessage.textContent =
+										"错误: 请输入搜索关键词！";
+									errorMessage.style.display = "block";
+									return;
+								}
+
+								const trimmedQuery = searchQuery.trim();
+								highlightTerms =
+									extractSearchTerms(trimmedQuery);
+								params.append("q", trimmedQuery);
+
+								const trimmedTalker = searchTalker.trim();
+								if (trimmedTalker) {
+									params.append("talker", trimmedTalker);
+								}
+
+								let searchTimeValue = "";
+								if (searchStartDate && searchEndDate) {
+									if (
+										new Date(searchStartDate) >
+										new Date(searchEndDate)
+									) {
+										errorMessage.textContent =
+											"错误: 结束日期不能早于开始日期！";
+										errorMessage.style.display = "block";
+										return;
+									}
+									searchTimeValue = `${searchStartDate}~${searchEndDate}`;
+								} else if (searchStartDate) {
+									searchTimeValue = searchStartDate;
+								} else if (!searchStartDate && searchEndDate) {
+									errorMessage.textContent =
+										"错误: 请先选择开始日期！";
+									errorMessage.style.display = "block";
+									return;
+								}
+
+								if (searchSender)
+									params.append(
+										"sender",
+										searchSender.trim()
+									);
+								if (searchTimeValue)
+									params.append("time", searchTimeValue);
+								if (searchLimit)
+									params.append("limit", searchLimit);
+								if (searchOffset)
+									params.append("offset", searchOffset);
+								if (searchFormatValue) {
+									params.append("format", searchFormatValue);
+									responseFormat = searchFormatValue;
+								}
+								break;
+							}
+						}
+
+						const apiUrl = params.toString()
+							? `${url}?${params.toString()}`
+							: url;
+						const fullUrl = window.location.origin + apiUrl;
+						if (requestUrlContainer) {
+							requestUrlContainer.textContent = fullUrl;
+						}
+						if (wrapper) {
+							wrapper.style.display = "block";
+						}
+						if (resultContainer) {
+							resultContainer.innerHTML =
+								'<div class="loading">加载中</div>';
+						}
+
+						const response = await fetch(apiUrl);
+						if (!response.ok) {
+							throw new Error(
+								`HTTP error! Status: ${response.status}`
+							);
+						}
+
+						const contentType =
+							response.headers.get("content-type") || "";
+						if (contentType.includes("application/json")) {
+							const data = await response.json();
+							const text = JSON.stringify(data, null, 2);
+							const highlighted = highlightPlainText(
+								text,
+								highlightTerms
+							);
+							if (resultContainer) {
+								resultContainer.innerHTML = `<pre class="result-block">${highlighted}</pre>`;
+							}
+						} else {
+							const textResult = await response.text();
+							const expectsHtml =
+								(responseFormat || "").toLowerCase() ===
+									"html" || contentType.includes("text/html");
+							if (expectsHtml) {
+								if (resultContainer) {
+									resultContainer.innerHTML = textResult;
+									highlightHtmlContent(
+										resultContainer,
+										highlightTerms
+									);
+								}
+							} else {
+								const highlighted = highlightPlainText(
+									textResult,
+									highlightTerms
+								);
+								if (resultContainer) {
+									resultContainer.innerHTML = `<pre class="result-block">${highlighted}</pre>`;
+								}
+							}
+						}
+					} catch (error) {
+						if (resultContainer) {
+							resultContainer.innerHTML = "";
+						}
+						if (errorMessage) {
+							errorMessage.textContent = `查询出错: ${error.message}`;
+							errorMessage.style.display = "block";
+						}
+						console.error("API查询出错:", error);
+					}
+				});
+			}
+
+			function escapeHtml(str) {
+				if (str == null) return "";
+				return str
+					.replace(/&/g, "&amp;")
+					.replace(/</g, "&lt;")
+					.replace(/>/g, "&gt;")
+					.replace(/"/g, "&quot;")
+					.replace(/'/g, "&#39;");
+			}
+
+			function extractSearchTerms(raw) {
+				if (!raw) return [];
+				return Array.from(
+					new Set(
+						raw
+							.split(/[\s,，；;、]+/)
+							.map((term) => term.trim())
+							.filter(Boolean)
+					)
+				);
+			}
+
+			function buildHighlightPattern(terms) {
+				if (!terms || !terms.length) return "";
+				const escaped = Array.from(
+					new Set(
+						terms
+							.map((term) =>
+								term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+							)
+							.filter(Boolean)
+					)
+				).sort((a, b) => b.length - a.length);
+				if (!escaped.length) return "";
+				return `(${escaped.join("|")})`;
+			}
+
+			function highlightPlainText(text, terms) {
+				const pattern = buildHighlightPattern(terms);
+				if (!pattern) {
+					return escapeHtml(text);
+				}
+				const regex = new RegExp(pattern, "gi");
+				let lastIndex = 0;
+				let highlighted = "";
+				text.replace(regex, (match, _group, offset) => {
+					highlighted += escapeHtml(text.slice(lastIndex, offset));
+					highlighted += `<mark class="search-highlight">${escapeHtml(
+						match
+					)}</mark>`;
+					lastIndex = offset + match.length;
+					return match;
+				});
+				highlighted += escapeHtml(text.slice(lastIndex));
+				return highlighted;
+			}
+
+			function highlightHtmlContent(container, terms) {
+				const pattern = buildHighlightPattern(terms);
+				if (!pattern) return;
+				const walker = document.createTreeWalker(
+					container,
+					NodeFilter.SHOW_TEXT,
+					null,
+					false
+				);
+				const nodes = [];
+				while (walker.nextNode()) {
+					const node = walker.currentNode;
+					if (!node || !node.nodeValue || !node.nodeValue.trim())
+						continue;
+					nodes.push(node);
+				}
+				nodes.forEach((textNode) => {
+					const text = textNode.nodeValue;
+					const regex = new RegExp(pattern, "gi");
+					if (!regex.test(text)) {
+						return;
+					}
+					regex.lastIndex = 0;
+					const fragment = document.createDocumentFragment();
+					let lastIndex = 0;
+					text.replace(regex, (match, _group, offset) => {
+						if (offset > lastIndex) {
+							fragment.appendChild(
+								document.createTextNode(
+									text.slice(lastIndex, offset)
+								)
+							);
+						}
+						const mark = document.createElement("mark");
+						mark.className = "search-highlight";
+						mark.textContent = match;
+						fragment.appendChild(mark);
+						lastIndex = offset + match.length;
+						return match;
+					});
+					if (lastIndex < text.length) {
+						fragment.appendChild(
+							document.createTextNode(text.slice(lastIndex))
+						);
+					}
+					textNode.parentNode.replaceChild(fragment, textNode);
+				});
+			}
+
+			const diaryDateInput = document.getElementById("diary-date");
+			if (diaryDateInput) {
+				const today = new Date();
+				const yyyy = today.getFullYear();
+				const mm = String(today.getMonth() + 1).padStart(2, "0");
+				const dd = String(today.getDate()).padStart(2, "0");
+				const todayStr = `${yyyy}-${mm}-${dd}`;
+				diaryDateInput.max = todayStr;
+				if (!diaryDateInput.value) {
+					diaryDateInput.value = todayStr;
+				}
+			}
+
+			(function () {
+				if (window.__chatlogVoiceHandler) {
+					return;
+				}
+				window.__chatlogVoiceHandler = true;
+				document.addEventListener("click", async function (event) {
+					const button = event.target.closest(
+						".voice-transcribe-btn"
+					);
+					if (!button) {
+						return;
+					}
+					const container = button.closest(".voice-entry");
+					const link = container
+						? container.querySelector("a.voice-link")
+						: null;
+					const result = container
+						? container.querySelector(".voice-transcribe-result")
+						: null;
+					if (!link) {
+						return;
+					}
+					event.preventDefault();
+					const href = link.getAttribute("href");
+					if (!href) {
+						return;
+					}
+					let url;
+					try {
+						url = new URL(href, window.location.origin);
+					} catch (err) {
+						if (result) {
+							result.textContent = "链接无效";
+							result.dataset.status = "error";
+						}
+						console.error("voice transcription url error", err);
+						return;
+					}
+					url.searchParams.set("transcribe", "1");
+					const previous = result ? result.textContent : "";
+					if (result) {
+						result.textContent = "转写中...";
+						result.dataset.status = "loading";
+					}
+					button.disabled = true;
+					button.classList.add("voice-transcribe-btn--busy");
+					try {
+						const response = await fetch(url.toString(), {
+							headers: { Accept: "application/json" },
+						});
+						if (!response.ok) {
+							throw new Error(`HTTP ${response.status}`);
+						}
+						let data = null;
+						const contentType =
+							response.headers.get("content-type");
+						if (
+							contentType &&
+							contentType.indexOf("application/json") >= 0
+						) {
+							data = await response.json();
+						}
+						const text =
+							data && typeof data.text === "string"
+								? data.text.trim()
+								: "";
+						if (result) {
+							if (text) {
+								result.textContent = text;
+								result.dataset.status = "done";
+							} else {
+								result.textContent = "未识别到语音内容";
+								result.dataset.status = "empty";
+							}
+							if (data && data.language) {
+								result.dataset.language = data.language;
+							}
+							if (
+								data &&
+								data.duration !== undefined &&
+								data.duration !== null
+							) {
+								result.dataset.duration = String(data.duration);
+							}
+						}
+					} catch (err) {
+						if (result) {
+							result.textContent = "转写失败";
+							result.dataset.status = "error";
+						}
+						console.error("voice transcription failed", err);
+					} finally {
+						button.disabled = false;
+						button.classList.remove("voice-transcribe-btn--busy");
+						if (result && result.dataset.status === "loading") {
+							result.textContent = previous;
+							delete result.dataset.status;
+						}
+					}
+				});
+			})();
+
+			// 复制结果功能
+			if (copyResultButton) {
+				copyResultButton.addEventListener("click", function () {
+					const resultText = apiResultContainer
+						? apiResultContainer.innerText
+						: "";
+					copyToClipboard(
+						resultText,
+						copyResultButton,
+						"已复制结果!"
+					);
+				});
+			}
+
+			// 复制URL功能
+			if (copyUrlButton) {
+				copyUrlButton.addEventListener("click", function () {
+					// 获取完整URL（包含域名部分）
+					const urlText = requestUrlElement
+						? requestUrlElement.innerText
+						: "";
+					copyToClipboard(urlText, copyUrlButton, "已复制URL!");
+				});
+			}
+
+			// 通用复制功能（支持非安全上下文的回退方案）
+			function copyToClipboard(text, button, successMessage) {
+				const originalText = button.textContent;
+				const toast = (msg) => {
+					button.textContent = msg;
+					setTimeout(() => {
+						button.textContent = originalText;
+					}, 2000);
+				};
+
+				// 无可复制内容
+				if (!text || text.trim() === "") {
+					toast("无可复制内容");
+					return;
+				}
+
+				// 现代 API，要求安全上下文（https 或 localhost）
+				if (navigator.clipboard && window.isSecureContext) {
+					navigator.clipboard
+						.writeText(text)
+						.then(() => {
+							toast(successMessage);
+						})
+						.catch((err) => {
+							// 失败时尝试回退
+							const ok = fallbackCopyTextToClipboard(text);
+							toast(ok ? successMessage : "复制失败");
+							if (!ok) console.error("复制失败:", err);
+						});
+					return;
+				}
+
+				// 非安全上下文或不支持 navigator.clipboard 时，使用回退方案
+				const ok = fallbackCopyTextToClipboard(text);
+				toast(ok ? successMessage : "复制失败");
+			}
+
+			// 回退复制方案：创建隐藏 textarea，使用 execCommand('copy')
+			function fallbackCopyTextToClipboard(text) {
+				try {
+					const textarea = document.createElement("textarea");
+					textarea.value = text;
+					// 避免页面滚动抖动
+					textarea.style.position = "fixed";
+					textarea.style.top = "-9999px";
+					textarea.style.left = "-9999px";
+					textarea.setAttribute("readonly", "");
+					document.body.appendChild(textarea);
+					textarea.focus();
+					textarea.select();
+					const ok = document.execCommand("copy");
+					document.body.removeChild(textarea);
+					return ok;
+				} catch (e) {
+					console.error("回退复制失败:", e);
+					return false;
+				}
+			}
+		</script>
+	</body>
+</html>
