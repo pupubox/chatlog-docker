@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  chatlog:
+    image: sjzar/chatlog:latest
+    container_name: chatlog
+    ports:
+      - "5030:5030"
+    volumes:
+      # 微信数据目录
+      - /Users/daidaichenyidongxitongintel/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat/2.0b4.0.9/82afacce9b162c3bbd0523e532f04746:/app/wechat-data:ro
+      # 持久化配置
+      - ./config:/app/config
+    environment:
+      - TZ=Asia/Shanghai
+      # 尝试让 chatlog 自动检测
+      - WECHAT_DATA_DIR=/app/wechat-data
+    command: chatlog server --debug
+    restart: unless-stopped
+    networks:
+      - chatlog-network
+
+networks:
+  chatlog-network:
+    driver: bridge
